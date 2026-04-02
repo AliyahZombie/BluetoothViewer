@@ -181,6 +181,11 @@ public class BluetoothDeviceConnector implements DeviceConnector {
         write((chars.toString() + "\n").getBytes());
     }
 
+    @Override
+    public void sendBytes(byte[] bytes) {
+        write(bytes);
+    }
+
     /**
      * Write to the ConnectedThread in an unsynchronized manner
      *

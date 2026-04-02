@@ -18,6 +18,7 @@ tmp
 
 # local distribution artifacts
 /release-dist/
+/release-download/
 
 # SonarCloud
 gradle.properties

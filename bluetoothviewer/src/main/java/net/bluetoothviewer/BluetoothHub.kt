@@ -101,6 +101,20 @@ object BluetoothHub {
         }
     }
 
+    fun sendBytes(bytes: ByteArray, appendNewline: Boolean) {
+        if (bytes.isEmpty()) {
+            return
+        }
+        if (appendNewline) {
+            val out = ByteArray(bytes.size + 1)
+            System.arraycopy(bytes, 0, out, 0, bytes.size)
+            out[out.lastIndex] = '\n'.code.toByte()
+            deviceConnector.sendBytes(out)
+        } else {
+            deviceConnector.sendBytes(bytes)
+        }
+    }
+
     fun addBroadcaster(broadcaster: (UiMessage) -> Unit) {
         broadcasters.add(broadcaster)
     }

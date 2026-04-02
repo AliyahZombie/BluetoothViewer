@@ -8,6 +8,9 @@ import org.java_websocket.handshake.ClientHandshake
 import org.java_websocket.server.WebSocketServer
 import org.json.JSONObject
 import java.net.InetSocketAddress
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.nio.charset.StandardCharsets
 
 class BluetoothWebSocketServer(
     address: InetSocketAddress,
@@ -101,6 +104,28 @@ class BluetoothWebSocketServer(
         }
     }
 
+    override fun onMessage(conn: WebSocket, message: ByteBuffer) {
+        val parsed = parseBinaryMessage(message)
+        if (parsed.isFailure) {
+            val ex = parsed.exceptionOrNull()
+            sendErr(conn, null, "invalid binary message", ex)
+            return
+        }
+        val bin = parsed.getOrThrow()
+        when (bin.type) {
+            "send.bin" -> {
+                BluetoothHub.sendBytes(bin.payload, bin.appendNewline)
+                val result = JSONObject()
+                result.put("bytes", bin.payload.size)
+                result.put("appendNewline", bin.appendNewline)
+                sendOk(conn, bin.id, result)
+            }
+            else -> {
+                sendErr(conn, bin.id, "unknown binary type", null)
+            }
+        }
+    }
+
     override fun onError(conn: WebSocket?, ex: Exception) {
         Log.e(TAG, ex.message, ex)
     }
@@ -177,6 +202,44 @@ class BluetoothWebSocketServer(
         }
         obj.put("error", err)
         conn.send(obj.toString())
+    }
+
+    private data class BinaryRequest(
+        val id: String?,
+        val type: String,
+        val appendNewline: Boolean,
+        val payload: ByteArray,
+    )
+
+    private fun parseBinaryMessage(message: ByteBuffer): Result<BinaryRequest> {
+        val buf = message.slice().order(ByteOrder.BIG_ENDIAN)
+        if (buf.remaining() < 4) {
+            return Result.failure(IllegalArgumentException("binary frame too small"))
+        }
+        val metaLen = buf.int
+        if (metaLen <= 0 || metaLen > 65536) {
+            return Result.failure(IllegalArgumentException("invalid metaLen=$metaLen"))
+        }
+        if (buf.remaining() < metaLen) {
+            return Result.failure(IllegalArgumentException("metadata truncated"))
+        }
+        val metaBytes = ByteArray(metaLen)
+        buf.get(metaBytes)
+        val metaJson = String(metaBytes, StandardCharsets.UTF_8)
+
+        val obj = try {
+            JSONObject(metaJson)
+        } catch (e: Exception) {
+            return Result.failure(e)
+        }
+
+        val type = obj.optString("type", "send.bin").trim().ifEmpty { "send.bin" }.lowercase()
+        val id = obj.optString("id").trim().ifEmpty { null }
+        val appendNewline = obj.optBoolean("appendNewline", false)
+
+        val payload = ByteArray(buf.remaining())
+        buf.get(payload)
+        return Result.success(BinaryRequest(id = id, type = type, appendNewline = appendNewline, payload = payload))
     }
 
     private fun deviceToJson(d: BluetoothDeviceManager.DeviceInfo): JSONObject {

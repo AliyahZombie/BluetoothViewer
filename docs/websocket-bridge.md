@@ -96,6 +96,24 @@ Notes:
 - The app sends ASCII bytes and appends a newline (`\n`) on write.
 - If there is no active Bluetooth connection, the send request is ignored.
 
+### 1b) Send binary payload with metadata (binary WebSocket frame)
+
+The server also accepts **binary WebSocket frames** to send raw bytes to the connected Bluetooth socket.
+
+Binary frame format:
+
+- First 4 bytes: `metaLen` (big-endian int)
+- Next `metaLen` bytes: UTF-8 JSON metadata object
+- Remaining bytes: payload
+
+Metadata fields:
+
+- `type`: must be `"send.bin"`
+- `id` (optional): correlation id for the `resp`
+- `appendNewline` (optional, default `false`): whether to append `0x0A` to payload
+
+Response is a normal text JSON `resp`.
+
 ### 2) Pause / resume inbound display
 
 ```json

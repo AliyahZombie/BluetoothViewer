@@ -44,6 +44,11 @@ public class MockLineByLineConnector implements DeviceConnector {
         // do nothing
     }
 
+    @Override
+    public void sendBytes(byte[] bytes) {
+        // do nothing
+    }
+
     class MockDeviceRunnable implements Runnable {
         @Override
         public void run() {
