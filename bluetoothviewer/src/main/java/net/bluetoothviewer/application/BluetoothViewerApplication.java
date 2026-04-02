@@ -8,6 +8,7 @@ import androidx.preference.PreferenceManager;
 import com.google.android.material.color.DynamicColors;
 
 import net.bluetoothviewer.library.R;
+import net.bluetoothviewer.bluetooth.BluetoothDeviceManager;
 import net.bluetoothviewer.ws.WebSocketController;
 
 public abstract class BluetoothViewerApplication extends Application implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -16,6 +17,8 @@ public abstract class BluetoothViewerApplication extends Application implements 
     public void onCreate() {
         super.onCreate();
         DynamicColors.applyToActivitiesIfAvailable(this);
+
+        BluetoothDeviceManager.INSTANCE.initialize(this);
 
         WebSocketController.INSTANCE.start(this);
 

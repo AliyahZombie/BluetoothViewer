@@ -33,6 +33,9 @@ object BluetoothHub {
     private val _connectedDeviceName = MutableStateFlow<String?>(null)
     val connectedDeviceName: StateFlow<String?> = _connectedDeviceName
 
+    private val _connectedDeviceAddress = MutableStateFlow<String?>(null)
+    val connectedDeviceAddress: StateFlow<String?> = _connectedDeviceAddress
+
     private val _paused = MutableStateFlow(false)
     val paused: StateFlow<Boolean> = _paused
 
@@ -73,6 +76,16 @@ object BluetoothHub {
             addStatus("error: could not create connector")
             return
         }
+        val address = data.getStringExtra("BLUETOOTH_ADDRESS")
+        _connectedDeviceAddress.value = address
+        deviceConnector.disconnect()
+        deviceConnector = connector
+        deviceConnector.connect()
+    }
+
+    fun connectToAddress(address: String) {
+        _connectedDeviceAddress.value = address
+        val connector: DeviceConnector = BluetoothDeviceConnector(messageHandler, address)
         deviceConnector.disconnect()
         deviceConnector = connector
         deviceConnector.connect()
@@ -141,16 +154,21 @@ object BluetoothHub {
         override fun sendNotConnected() {
             _connectionStatus.value = ConnectionStatus.DISCONNECTED
             _connectedDeviceName.value = null
+            _connectedDeviceAddress.value = null
             addStatus("not connected")
         }
 
         override fun sendConnectionFailed() {
             _connectionStatus.value = ConnectionStatus.DISCONNECTED
+            _connectedDeviceName.value = null
+            _connectedDeviceAddress.value = null
             addStatus("connection failed")
         }
 
         override fun sendConnectionLost() {
             _connectionStatus.value = ConnectionStatus.DISCONNECTED
+            _connectedDeviceName.value = null
+            _connectedDeviceAddress.value = null
             addStatus("connection lost")
         }
     }

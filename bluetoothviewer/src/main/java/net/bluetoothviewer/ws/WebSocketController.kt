@@ -3,14 +3,17 @@ package net.bluetoothviewer.ws
 import android.content.Context
 import androidx.preference.PreferenceManager
 import net.bluetoothviewer.BluetoothHub
+import net.bluetoothviewer.bluetooth.BluetoothDeviceManager
 import net.bluetoothviewer.library.R
 import java.net.InetSocketAddress
 import java.util.concurrent.Executors
+import org.json.JSONObject
 
 object WebSocketController {
 
     private var server: BluetoothWebSocketServer? = null
     private var broadcaster: ((BluetoothHub.UiMessage) -> Unit)? = null
+    private var scanListener: ((BluetoothDeviceManager.Event) -> Unit)? = null
     private var lastConfig: Config? = null
 
     private val executor = Executors.newSingleThreadExecutor { r ->
@@ -66,6 +69,31 @@ object WebSocketController {
         }
         broadcaster = bc
         BluetoothHub.addBroadcaster(bc)
+
+        val sl: (BluetoothDeviceManager.Event) -> Unit = { ev ->
+            when (ev) {
+                is BluetoothDeviceManager.Event.ScanStarted -> {
+                    ws.broadcastEvent("scan.started", JSONObject())
+                }
+                is BluetoothDeviceManager.Event.ScanFinished -> {
+                    ws.broadcastEvent("scan.finished", JSONObject())
+                }
+                is BluetoothDeviceManager.Event.DeviceFound -> {
+                    val data = JSONObject()
+                    data.put("device", JSONObject().apply {
+                        put("name", ev.device.name)
+                        put("address", ev.device.address)
+                        put("bonded", ev.device.bonded)
+                        put("rssi", ev.device.rssi)
+                        put("source", ev.device.source.name.lowercase())
+                    })
+                    ws.broadcastEvent("scan.deviceFound", data)
+                }
+            }
+        }
+        scanListener = sl
+        BluetoothDeviceManager.addListener(sl)
+
         server = ws
         ws.start()
     }
@@ -86,6 +114,12 @@ object WebSocketController {
             BluetoothHub.removeBroadcaster(bc)
         }
         broadcaster = null
+
+        val sl = scanListener
+        if (sl != null) {
+            BluetoothDeviceManager.removeListener(sl)
+        }
+        scanListener = null
     }
 
     private fun readConfig(context: Context): Config {

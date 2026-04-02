@@ -56,6 +56,13 @@ For each UI message (Bluetooth inbound/outbound + connection state), the server 
 {"type":"out","text":">>> ..."}
 ```
 
+Note: the server does not add a prefix for outbound writes. The `out.text` value is the decoded bytes written to the Bluetooth socket.
+In other words, expect:
+
+```json
+{"type":"out","text":"..."}
+```
+
 ```json
 {"type":"status","text":"connected: <device>"}
 ```
@@ -106,6 +113,105 @@ When paused, inbound lines are not appended to the UI message stream.
 ```json
 {"type":"disconnect"}
 ```
+
+## Request/response API
+
+In addition to the legacy commands above, the server supports JSON requests with a correlated response.
+
+### Response envelope
+
+Success:
+
+```json
+{"type":"resp","id":"<id>","ok":true,"result":{}}
+```
+
+Error:
+
+```json
+{"type":"resp","id":"<id>","ok":false,"error":{"message":"...","exception":"...","details":"..."}}
+```
+
+### 1) List Bluetooth devices
+
+Request:
+
+```json
+{"id":"1","type":"devices.list","scope":"paired"}
+```
+
+`scope` can be:
+
+- `paired` (default)
+- `discovered`
+- `all`
+
+Response example:
+
+```json
+{"type":"resp","id":"1","ok":true,"result":{"devices":[{"name":"HC-05","address":"00:11:22:33:44:55","bonded":true,"rssi":null,"source":"paired"}]}}
+```
+
+### 2) Start/stop scanning (classic discovery)
+
+Start scan:
+
+```json
+{"id":"2","type":"scan.start"}
+```
+
+Stop scan:
+
+```json
+{"id":"3","type":"scan.stop"}
+```
+
+#### Scan events (broadcast)
+
+While scanning, the server broadcasts events:
+
+```json
+{"type":"event","name":"scan.started","data":{}}
+```
+
+```json
+{"type":"event","name":"scan.deviceFound","data":{"device":{"name":"...","address":"...","bonded":false,"rssi":-71,"source":"discovered"}}}
+```
+
+```json
+{"type":"event","name":"scan.finished","data":{}}
+```
+
+### 3) Connect by MAC address
+
+Request:
+
+```json
+{"id":"4","type":"connect","address":"AA:BB:CC:DD:EE:FF"}
+```
+
+The connection state transitions are still broadcast via `{"type":"status","text":"..."}` from the Bluetooth hub.
+
+### 4) Get current connection info
+
+Request:
+
+```json
+{"id":"5","type":"connection.info"}
+```
+
+Response example:
+
+```json
+{"type":"resp","id":"5","ok":true,"result":{"status":"connected","deviceName":"MyDevice","deviceAddress":"AA:BB:CC:DD:EE:FF","paused":false}}
+```
+
+## Permissions
+
+Device listing, scanning, and connecting require runtime Bluetooth permissions depending on Android version.
+
+- Android 12+ (API 31+): `BLUETOOTH_SCAN` for scanning, `BLUETOOTH_CONNECT` for paired devices/connecting
+- Android 6-11: `ACCESS_FINE_LOCATION` for scanning
 
 ## Security
 
