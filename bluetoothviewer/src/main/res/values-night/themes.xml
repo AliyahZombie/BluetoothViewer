@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Night theme inherits from DayNight; keep overrides minimal. -->
+    <style name="Theme.BluetoothViewer" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar" />
+    <style name="Theme.BluetoothViewer.Dialog" parent="Theme.Material3.DayNight.Dialog" />
+</resources>

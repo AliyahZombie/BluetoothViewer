@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.BluetoothViewer" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/bv_primary</item>
+        <item name="colorOnPrimary">@color/bv_onPrimary</item>
+        <item name="colorSecondary">@color/bv_secondary</item>
+        <item name="colorOnSecondary">@color/bv_onSecondary</item>
+
+        <!-- Better defaults for input fields and typography -->
+        <item name="android:windowSoftInputMode">stateHidden|adjustResize</item>
+    </style>
+
+    <style name="Theme.BluetoothViewer.Dialog" parent="Theme.Material3.DayNight.Dialog">
+    </style>
+
+</resources>

@@ -5,7 +5,21 @@ dependencies {
 }
 
 android {
-    compileSdkVersion rootProject.compileSdkVersion
+    namespace 'net.bluetoothviewer'
+    compileSdk rootProject.compileSdkVersion
+
+    defaultConfig {
+        applicationId 'net.bluetoothviewer'
+        minSdk rootProject.minSdkVersion
+        targetSdk rootProject.targetSdkVersion
+        versionCode 11
+        versionName '1.1.5'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
 
     if (rootProject.storeFilePath) {
         signingConfigs {

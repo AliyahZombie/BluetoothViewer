@@ -16,7 +16,6 @@
 
 package net.bluetoothviewer;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -25,15 +24,20 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.content.pm.PackageManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import net.bluetoothviewer.library.R;
 import net.bluetoothviewer.util.AssetUtils;
@@ -46,7 +50,9 @@ import java.util.Set;
  * and it can scan for devices nearby. When the user selects a device,
  * its MAC address is returned to the caller as the result of this activity.
  */
-public class DeviceListActivity extends Activity {
+public class DeviceListActivity extends AppCompatActivity {
+
+    private static final int REQUEST_PERMISSIONS = 20;
 
     private static final String TAG = "DeviceListActivity";
     private static final boolean D = true;
@@ -130,15 +136,14 @@ public class DeviceListActivity extends Activity {
 
     private Button scanButton;
 
+    private boolean receiverRegistered = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.device_list);
 
-        // Set default result to CANCELED, in case the user backs out
-        setResult(Activity.RESULT_CANCELED);
+        setResult(RESULT_CANCELED);
 
         boolean foundMockDevices = false;
         if (getIntent().getBooleanExtra(EXTRA_MOCK_DEVICES_ENABLED, false)) {
@@ -160,6 +165,10 @@ public class DeviceListActivity extends Activity {
             if (foundMockDevices) {
                 findViewById(R.id.title_mock_devices).setVisibility(View.VISIBLE);
             }
+        }
+
+        if (!ensureBluetoothPermissions()) {
+            return;
         }
 
         boolean foundBluetoothDevices = false;
@@ -193,6 +202,8 @@ public class DeviceListActivity extends Activity {
         IntentFilter discoveryFinishedFilter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         registerReceiver(mReceiver, discoveryFinishedFilter);
 
+        receiverRegistered = true;
+
         scanButton = (Button) findViewById(R.id.button_scan);
         scanButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -206,9 +217,69 @@ public class DeviceListActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
 
-        mBtAdapter.cancelDiscovery();
+        if (hasScanPermission()) {
+            mBtAdapter.cancelDiscovery();
+        }
 
-        this.unregisterReceiver(mReceiver);
+        if (receiverRegistered) {
+            this.unregisterReceiver(mReceiver);
+            receiverRegistered = false;
+        }
+    }
+
+    private boolean ensureBluetoothPermissions() {
+        String[] perms = getRequiredRuntimePermissions();
+        if (perms.length == 0) {
+            return true;
+        }
+        for (String permission : perms) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, perms, REQUEST_PERMISSIONS);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private String[] getRequiredRuntimePermissions() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            return new String[] {
+                    android.Manifest.permission.BLUETOOTH_CONNECT,
+                    android.Manifest.permission.BLUETOOTH_SCAN,
+            };
+        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            return new String[] { android.Manifest.permission.ACCESS_FINE_LOCATION };
+        }
+        return new String[0];
+    }
+
+    private boolean hasScanPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            return ContextCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED;
+        }
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_PERMISSIONS) {
+            boolean granted = true;
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    granted = false;
+                    break;
+                }
+            }
+            if (!granted) {
+                findViewById(R.id.label_none_found).setVisibility(View.VISIBLE);
+                scanButton.setEnabled(false);
+                return;
+            }
+
+            recreate();
+        }
     }
 
     /**
@@ -219,8 +290,6 @@ public class DeviceListActivity extends Activity {
 
         mNewDevicesArrayAdapter.clear();
         mNewDevicesSet.clear();
-
-        setProgressBarIndeterminateVisibility(true);
 
         findViewById(R.id.label_none_found).setVisibility(View.GONE);
         findViewById(R.id.title_new_devices).setVisibility(View.VISIBLE);
@@ -246,7 +315,7 @@ public class DeviceListActivity extends Activity {
             if (item != null) {
                 Intent intent = new Intent();
                 putExtras(intent, item);
-                setResult(Activity.RESULT_OK, intent);
+                setResult(RESULT_OK, intent);
             }
             finish();
         }
@@ -297,7 +366,6 @@ public class DeviceListActivity extends Activity {
                     Log.e(TAG, "Could not get parcelable extra: " + parcelableExtraName);
                 }
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                setProgressBarIndeterminateVisibility(false);
                 findViewById(R.id.label_scanning).setVisibility(View.GONE);
                 if (mNewDevicesSet.isEmpty()) {
                     findViewById(R.id.label_none_found).setVisibility(View.VISIBLE);

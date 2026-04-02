@@ -14,17 +14,15 @@
 
 package net.bluetoothviewer;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
-import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -42,11 +40,21 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.text.HtmlCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.preference.PreferenceManager;
+
 import net.bluetoothviewer.library.R;
 import net.bluetoothviewer.util.ApplicationUtils;
 import net.bluetoothviewer.util.EmailUtils;
 
-public class BluetoothViewer extends Activity implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class BluetoothViewer extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = BluetoothViewer.class.getSimpleName();
     private static final boolean D = true;
@@ -56,6 +64,8 @@ public class BluetoothViewer extends Activity implements SharedPreferences.OnSha
     private static final int REQUEST_ENABLE_BT = 2;
     private static final int REQUEST_LAUNCH_EMAIL_APP = 3;
     private static final int MENU_SETTINGS = 4;
+
+    private static final int REQUEST_PERMISSIONS = 10;
 
     private static final String SAVED_PENDING_REQUEST_ENABLE_BT = "PENDING_REQUEST_ENABLE_BT";
 
@@ -158,11 +168,21 @@ public class BluetoothViewer extends Activity implements SharedPreferences.OnSha
         Log.d(TAG, "++onCreate");
         super.onCreate(savedInstanceState);
 
+        EdgeToEdge.enable(this);
+
         if (savedInstanceState != null) {
             pendingRequestEnableBt = savedInstanceState.getBoolean(SAVED_PENDING_REQUEST_ENABLE_BT);
         }
 
         setContentView(R.layout.bluetoothviewer);
+
+        View contentView = findViewById(android.R.id.content);
+        ViewCompat.setOnApplyWindowInsetsListener(contentView, (v, insets) -> {
+            androidx.core.graphics.Insets sysBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(sysBars.left, sysBars.top, sysBars.right, sysBars.bottom);
+            return insets;
+        });
+        ViewCompat.requestApplyInsets(contentView);
 
         updateParamsFromSettings();
 
@@ -206,7 +226,9 @@ public class BluetoothViewer extends Activity implements SharedPreferences.OnSha
 
         boolean isLiteVersion = ApplicationUtils.isLiteVersion(getApplication());
         mWelcomeText = (TextView) findViewById(R.id.msg_welcome);
-        mWelcomeText.setText(Html.fromHtml(getString(isLiteVersion ? R.string.welcome_lite : R.string.welcome_full)));
+        mWelcomeText.setText(HtmlCompat.fromHtml(
+                getString(isLiteVersion ? R.string.welcome_lite : R.string.welcome_full),
+                HtmlCompat.FROM_HTML_MODE_LEGACY));
         mWelcomeText.setMovementMethod(LinkMovementMethod.getInstance());
 
         // Initialize the compose field with a listener for the return key
@@ -225,8 +247,43 @@ public class BluetoothViewer extends Activity implements SharedPreferences.OnSha
         onBluetoothStateChanged();
 
         if (!mockDevicesEnabled) {
-            requestEnableBluetooth();
+            ensureBluetoothPermissionsAndEnableIfNeeded();
         }
+    }
+
+    private void ensureBluetoothPermissionsAndEnableIfNeeded() {
+        String[] perms = getRequiredRuntimePermissions();
+        if (perms.length == 0) {
+            requestEnableBluetooth();
+            return;
+        }
+        if (!hasAllPermissions(perms)) {
+            ActivityCompat.requestPermissions(this, perms, REQUEST_PERMISSIONS);
+            return;
+        }
+        requestEnableBluetooth();
+    }
+
+    private String[] getRequiredRuntimePermissions() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            return new String[] {
+                    android.Manifest.permission.BLUETOOTH_CONNECT,
+                    android.Manifest.permission.BLUETOOTH_SCAN,
+            };
+        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            return new String[] { android.Manifest.permission.ACCESS_FINE_LOCATION };
+        }
+        return new String[0];
+    }
+
+    private boolean hasAllPermissions(String[] permissions) {
+        for (String permission : permissions) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void updateParamsFromSettings() {
@@ -250,11 +307,31 @@ public class BluetoothViewer extends Activity implements SharedPreferences.OnSha
     }
 
     private boolean isBluetoothAdapterEnabled() {
-        return getBluetoothAdapter().isEnabled();
+        BluetoothAdapter adapter = getBluetoothAdapter();
+        return adapter != null && adapter.isEnabled();
     }
 
     private BluetoothAdapter getBluetoothAdapter() {
         return BluetoothAdapter.getDefaultAdapter();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_PERMISSIONS) {
+            boolean granted = true;
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    granted = false;
+                    break;
+                }
+            }
+            if (granted) {
+                requestEnableBluetooth();
+            } else {
+                Toast.makeText(this, R.string.btstatus_not_connected, Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     @Override
@@ -275,7 +352,7 @@ public class BluetoothViewer extends Activity implements SharedPreferences.OnSha
         Log.i(TAG, "onActivityResult " + resultCode);
         switch (requestCode) {
             case REQUEST_CONNECT_DEVICE:
-                if (resultCode == Activity.RESULT_OK) {
+                if (resultCode == RESULT_OK) {
                     MessageHandler messageHandler = new MessageHandlerImpl(mHandler);
                     mDeviceConnector = DeviceListActivity.createDeviceConnector(data, messageHandler, getAssets());
                     if (mDeviceConnector != null) {
@@ -288,12 +365,12 @@ public class BluetoothViewer extends Activity implements SharedPreferences.OnSha
             case REQUEST_ENABLE_BT:
                 // When the request to enable Bluetooth returns
                 pendingRequestEnableBt = false;
-                if (resultCode != Activity.RESULT_OK) {
+                if (resultCode != RESULT_OK) {
                     Log.i(TAG, "BT not enabled");
                 }
                 break;
             case REQUEST_LAUNCH_EMAIL_APP:
-                if (resultCode == Activity.RESULT_OK) {
+                if (resultCode == RESULT_OK) {
                     Toast.makeText(this, R.string.msg_email_sent, Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(this, R.string.msg_email_not_sent, Toast.LENGTH_LONG).show();
@@ -324,10 +401,13 @@ public class BluetoothViewer extends Activity implements SharedPreferences.OnSha
         int itemId = item.getItemId();
         if (itemId == R.id.menu_rate) {
             openURL(getString(R.string.url_rate));
+            return true;
         } else if (itemId == R.id.menu_buy) {
             openURL(getString(R.string.url_full_app));
+            return true;
         } else if (itemId == R.id.menu_settings) {
             startActivityForResult(SettingsActivity.class, MENU_SETTINGS);
+            return true;
         } else if (itemId == R.id.menu_email_recorded_data) {
             if (recording.length() > 0) {
                 launchEmailApp(EmailUtils.prepareDeviceRecording(this, defaultEmail, deviceName, recording.toString()));
@@ -336,8 +416,9 @@ public class BluetoothViewer extends Activity implements SharedPreferences.OnSha
             } else {
                 Toast.makeText(this, R.string.msg_nothing_recorded_recording_disabled, Toast.LENGTH_LONG).show();
             }
+            return true;
         }
-        return false;
+        return super.onOptionsItemSelected(item);
     }
 
     private void launchEmailApp(Intent intent) {

@@ -15,72 +15,85 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:background="@drawable/background_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurface"
     android:orientation="vertical">
 
-    <TextView android:id="@+id/btstatus"
-        android:gravity="end"
-        android:ellipsize="end"
-        android:singleLine="true"
-        android:layout_width="fill_parent"
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/btstatus"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?attr/colorSurfaceVariant"
+        android:ellipsize="end"
+        android:gravity="end"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="8dp"
+        android:singleLine="true"
         android:text="@string/btstatus_not_connected"
-        android:background="#40ffffff"
-        />
+        android:textColor="?attr/colorOnSurfaceVariant" />
 
     <ListView
         android:id="@+id/in"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:stackFromBottom="true"
         android:visibility="gone"
         android:transcriptMode="alwaysScroll" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/msg_welcome"
-        android:textSize="18sp"
-        android:padding="5dp"
+        android:padding="16dp"
         android:text="@string/welcome_lite"
         android:linksClickable="true"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_weight="1"
         android:layout_height="0dp" />
 
     <LinearLayout
         android:id="@+id/send_text_container"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingHorizontal="12dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="12dp"
         android:orientation="horizontal"
         android:visibility="gone">
 
-        <EditText
-            android:id="@+id/edit_text_out"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:layout_weight="1"
-            android:inputType="text" />
+            android:layout_weight="1">
 
-        <Button
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_text_out"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/send"
+                android:imeOptions="actionSend"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/button_send"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
             android:text="@string/send" />
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/toolbarbg"
+        android:background="?attr/colorSurfaceContainerHighest"
         android:orientation="horizontal">
 
         <ImageButton
             android:id="@+id/toolbar_btn_connect"
             style="@style/toolbarButton"
             android:src="@drawable/toolbar_btn_connect"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:visibility="gone"
             tools:ignore="ContentDescription" />
 
@@ -88,6 +101,7 @@
             android:id="@+id/toolbar_btn_disconnect"
             style="@style/toolbarButton"
             android:src="@drawable/toolbar_btn_disconnect"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:visibility="gone"
             tools:ignore="ContentDescription" />
 
@@ -95,6 +109,7 @@
             android:id="@+id/toolbar_btn_pause"
             style="@style/toolbarButton"
             android:src="@drawable/toolbar_btn_pause"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:visibility="gone"
             tools:ignore="ContentDescription" />
 
@@ -102,6 +117,7 @@
             android:id="@+id/toolbar_btn_play"
             style="@style/toolbarButton"
             android:src="@drawable/toolbar_btn_play"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:visibility="gone"
             tools:ignore="ContentDescription" />
     </LinearLayout>

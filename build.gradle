@@ -1,28 +1,24 @@
 buildscript {
     repositories {
         google()
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.android.tools.build:gradle:8.6.1'
     }
-}
-
-// create gradle.properties with content
-//systemProp.sonar.host.url=https://sonarcloud.io
-//systemProp.sonar.login=get-token-from-sonarcloud
-// run ./gradlew sonarqube
-plugins {
-    id "org.sonarqube" version "2.7"
 }
 
 allprojects {
     repositories {
+        google()
         mavenCentral()
     }
 }
 
 ext {
-    compileSdkVersion = 19
+    compileSdkVersion = 35
+    minSdkVersion = 21
+    targetSdkVersion = 35
     storeFilePath = System.getenv('STORE_FILE')
     storePassword = System.getenv('STORE_PASSWORD')
     keyAlias = System.getenv('KEY_ALIAS')
