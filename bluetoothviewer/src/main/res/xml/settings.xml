@@ -2,7 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <SwitchPreferenceCompat
-        android:checked="false"
+        android:defaultValue="false"
         android:key="@string/pref_record"
         android:summary="@string/summary_record"
         android:title="@string/title_record" />
@@ -13,9 +13,28 @@
         android:title="@string/title_default_email" />
 
     <SwitchPreferenceCompat
-        android:checked="false"
+        android:defaultValue="false"
         android:key="@string/pref_enable_mock_devices"
         android:summary="@string/summary_enable_mock_devices"
         android:title="@string/title_enable_mock_devices" />
+
+    <SwitchPreferenceCompat
+        android:defaultValue="true"
+        android:key="@string/pref_ws_enabled"
+        android:summary="@string/summary_ws_enabled"
+        android:title="@string/title_ws_enabled" />
+
+    <EditTextPreference
+        android:defaultValue="8765"
+        android:inputType="number"
+        android:key="@string/pref_ws_port"
+        android:summary="@string/summary_ws_port"
+        android:title="@string/title_ws_port" />
+
+    <SwitchPreferenceCompat
+        android:defaultValue="false"
+        android:key="@string/pref_ws_bind_all"
+        android:summary="@string/summary_ws_bind_all"
+        android:title="@string/title_ws_bind_all" />
 
 </PreferenceScreen>

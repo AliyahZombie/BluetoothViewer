@@ -10,6 +10,12 @@ This app is a simple Bluetooth connection debugging tool:
 You can confirm successful pairing, monitor incoming raw data and see
 exactly what is transmitted from the Bluetooth device.
 
+## WebSocket bridge
+
+BluetoothViewer can run an in-app WebSocket **server** and mirror Bluetooth I/O.
+
+See: [docs/websocket-bridge.md](docs/websocket-bridge.md)
+
 * Android app on Google Play, with screenshots:
   https://play.google.com/store/apps/details?id=net.bluetoothviewer
 

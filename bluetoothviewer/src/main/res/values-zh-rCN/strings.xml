@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">蓝牙查看器</string>
+    <string name="app_name_lite">蓝牙查看器（精简版）</string>
+
+    <string name="send">发送</string>
+    <string name="not_connected">尚未连接到设备</string>
+
+    <string name="btstatus_connecting_to_fmt">正在连接：%s</string>
+    <string name="btstatus_connected_to_fmt">已连接：%s</string>
+    <string name="btstatus_not_connected">未连接</string>
+
+    <string name="title_select_device">选择要连接的设备</string>
+    <string name="label_scanning">正在扫描…</string>
+    <string name="label_no_available_devices">未发现设备</string>
+    <string name="title_mock_devices">模拟设备</string>
+    <string name="title_paired_devices">已配对设备</string>
+    <string name="title_other_devices">其他可用设备</string>
+    <string name="button_scan">扫描设备</string>
+
+    <string name="menu_settings">设置</string>
+    <string name="menu_email_recorded_data">邮件发送已记录数据</string>
+
+    <string name="welcome_lite"><![CDATA[
+        <h3>欢迎使用蓝牙查看器（精简版）！</h3>
+        <p>本应用是面向<strong>程序员</strong>的蓝牙连接调试工具。
+        <em>如果你不是程序员，这个工具可能对你没有帮助。</em></p>
+        <p>连接到蓝牙设备后，应用会按“行”读取并展示数据。
+        因此它只适用于以文本形式逐行输出数据的设备。
+        <strong><em>并非所有设备都能正常工作。</em></strong></p>
+        <p>如遇问题请到 GitHub <a href="https://github.com/janosgyerik/bluetoothviewer/issues">提交反馈</a>。</p>
+        ]]></string>
+
+    <string name="welcome_full"><![CDATA[
+        <h3>欢迎使用蓝牙查看器！</h3>
+        <p>本应用是面向<strong>程序员</strong>的蓝牙连接调试工具。
+        <em>如果你不是程序员，这个工具可能对你没有帮助。</em></p>
+        <p>连接到蓝牙设备后，应用会按“行”读取并展示数据。
+        因此它只适用于以文本形式逐行输出数据的设备。
+        <strong><em>并非所有设备都能正常工作。</em></strong></p>
+        <p>如遇问题请到 GitHub <a href="https://github.com/janosgyerik/bluetoothviewer/issues">提交反馈</a>。</p>
+        ]]></string>
+
+    <string name="email_client_chooser">选择邮件应用…</string>
+    <string name="no_email_client">未找到邮件客户端，无法发送</string>
+    <string name="fmt_subject_recorded_data">记录数据：%s</string>
+    <string name="fmt_recorded_from">见附件：从蓝牙设备 %s 记录的数据</string>
+
+    <string name="pref_record">record</string>
+    <string name="title_record">启用记录</string>
+    <string name="summary_record">记录蓝牙数据</string>
+
+    <string name="pref_default_email">default_email</string>
+    <string name="title_default_email">默认邮箱地址</string>
+    <string name="summary_default_email">设置用于发送记录数据的默认邮箱</string>
+
+    <string name="pref_enable_mock_devices">enable_mock_devices</string>
+    <string name="title_enable_mock_devices">启用模拟设备</string>
+    <string name="summary_enable_mock_devices">模拟设备可用于无真实蓝牙设备时测试</string>
+
+    <string name="title_settings_activity">设置</string>
+    <string name="msg_nothing_recorded">没有记录到内容，无法发送。</string>
+    <string name="msg_nothing_recorded_recording_disabled">没有记录到内容。请在设置中启用记录功能。</string>
+    <string name="msg_email_sent">邮件已发送。</string>
+    <string name="msg_email_not_sent">邮件未发送。</string>
+
+    <string name="error_could_not_create_device">无法创建设备连接。</string>
+
+    <string name="pref_ws_enabled">ws_enabled</string>
+    <string name="title_ws_enabled">启用 WebSocket 桥接</string>
+    <string name="summary_ws_enabled">暴露 WebSocket 接口以镜像蓝牙收发数据</string>
+
+    <string name="pref_ws_bind_all">ws_bind_all</string>
+    <string name="title_ws_bind_all">监听所有网卡（0.0.0.0）</string>
+    <string name="summary_ws_bind_all">允许局域网内其他设备连接</string>
+
+    <string name="pref_ws_port">ws_port</string>
+    <string name="title_ws_port">WebSocket 端口</string>
+    <string name="summary_ws_port">应用内 WebSocket 服务器使用的端口</string>
+</resources>

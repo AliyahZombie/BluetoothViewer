@@ -16,5 +16,8 @@ tmp
 /graphics/market/
 .DS_Store
 
+# local distribution artifacts
+/release-dist/
+
 # SonarCloud
 gradle.properties
