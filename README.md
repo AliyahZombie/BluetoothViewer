@@ -1,94 +1,35 @@
-BluetoothViewer
-===============
+# BluetoothViewer - Enhanced
 
-This app is a simple Bluetooth connection debugging tool:
+[English] | [中文](README_zh.md)
 
-1. Connect to a Bluetooth device
-2. Display incoming raw data
-3. Send raw data to the Bluetooth device
+A lightweight tool for Bluetooth connection debugging and data synchronization. Base on the original BluetoothViewer project with enhanced features.
 
-You can confirm successful pairing, monitor incoming raw data and see
-exactly what is transmitted from the Bluetooth device.
+## Key Features
 
-## WebSocket bridge
-
-BluetoothViewer can run an in-app WebSocket **server** and mirror Bluetooth I/O.
-
-See: [docs/websocket-bridge.md](docs/websocket-bridge.md)
-
-* Android app on Google Play, with screenshots:
-  https://play.google.com/store/apps/details?id=net.bluetoothviewer
+1. **Bluetooth Debugging**: 
+   - Connect to classic Bluetooth devices (Server mode).
+   - Display incoming raw data in real-time.
+   - Send raw data back to the device.
+2. **WebSocket Bridge**: 
+   - **Internal WebSocket Server**: This app runs an in-app WebSocket server to mirror Bluetooth I/O.
+   - **Remote Control**: You can monitor and interact with the Bluetooth device from any WebSocket client (PC, Web browser, etc.) over the local network.
+   - See: [docs/websocket-bridge.md](docs/websocket-bridge.md)
 
 
-Limitations
------------
+## Technical Requirements
 
-The app works only with certain types of Bluetooth devices:
+The app works with Bluetooth devices that meet the following criteria:
+* Operates in **Server Mode** (accepts incoming connections).
+* Listens on **Channel 1**.
+* Pairs and connects without requiring a specific custom UUID.
 
-- Devices that work in *server mode*. That is, devices that
-  listen to and accept incoming Bluetooth connections.
+## How it works (WebSocket Bridge)
 
-- Devices that accept connections on *channel=1*
+Once the WebSocket bridge is enabled:
+* Incoming Bluetooth data is broadcasted to all connected WebSocket clients.
+* Data sent to the WebSocket server is forwarded to the connected Bluetooth device.
 
-- Devices that don't require a specific UUID during connection.
+## Disclaimer & License
 
-- Devices that can be paired.
-
-All these conditions are required, at least for now.
-I plan to add in the next release the option to set the channel,
-and to set a specific UUID.
-
-Another limitation is that the current version shows incoming
-data in ASCII format. If your device sends binary data, that
-won't be very readable. To help with that, I plan to add
-a hexadecimal view that can be easily switched on/off.
-Another option is to send the received data as an attachment.
-
-Finally, keep in mind that some devices need some sort of
-"activation signal" first before they would start sending data.
-This depends on the device, and you would have to look at the
-technical documentation of your device to figure this out.
-
-
-Feature ideas
--------------
-
-I plan to add the following features in the future:
-
-* Option to specify channel to use when connecting
-
-* Option to specify UUID to use when connecting
-
-* Option to add timestamp to incoming messages
-
-* Option to add GPS info to incoming messages
-
-* Design a plugin framework for customized views tailored to specific
-  Bluetooth sensors
-
-For more details, see the more detailed (but quite crude) `todo.md` file.
-
-
-Contributing code
------------------
-
-You can contribute improvements in whatever way is convenient for you, for example:
-
-* Create a Pull Request on GitHub:
-  https://github.com/janosgyerik/bluetoothviewer
-
-* Email your patches to info@janosgyerik.com
-
-
-Sponsors
---------
-
-* Alan Haddy (www.ipegcorp.com): option to record incoming Bluetooth
-  data and send as email attachment
-
-
-Disclaimer
-----------
-
-The source code is a modified version of the BluetoothChat sample
-that is included in the Android SDK.
+- This project is a modified version of the original BluetoothViewer, which was itself based on the Android SDK BluetoothChat sample.
+- Licensed under the **Apache License 2.0**. See the `LICENSE` file for details.
