@@ -31,5 +31,5 @@ Once the WebSocket bridge is enabled:
 
 ## Disclaimer & License
 
-- This project is a modified version of the original BluetoothViewer, which was itself based on the Android SDK BluetoothChat sample.
+- This project is a modified version of the original https://github.com/janosgyerik/bluetoothviewer , which was itself based on the Android SDK BluetoothChat sample.
 - Licensed under the **Apache License 2.0**. See the `LICENSE` file for details.
