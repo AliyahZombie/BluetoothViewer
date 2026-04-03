@@ -2,6 +2,8 @@
 
 [English] | [中文](README_zh.md)
 
+[![LINUX DO](https://img.shields.io/badge/LINUX--DO-Community-blue?logo=linux.do&logoColor=white)](https://linux.do/)
+
 A lightweight tool for Bluetooth connection debugging and data synchronization. Base on the original BluetoothViewer project with enhanced features.
 
 ## Key Features

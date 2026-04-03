@@ -2,6 +2,8 @@
 
 [English](README.md) | [中文]
 
+[![LINUX DO](https://img.shields.io/badge/LINUX--DO-Community-blue?logo=linux.do&logoColor=white)](https://linux.do/)
+
 一款轻量级的蓝牙连接调试与数据转发工具。在原开源项目基础上进行了精简，并新增了 WebSocket 桥接功能。
 
 ## 核心功能
